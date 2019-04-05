@@ -1,0 +1,50 @@
+#!/bin/sh -l
+
+#PBS -N ab3
+#PBS -q fnrgenetics
+#PBS -l nodes=1:ppn=10,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/
+
+module purge
+module use /apps/group/bioinfo/modules
+module load abyss
+
+###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
+# deNovo assembly of unassembled reads ----------
+cd /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/
+mkdir unassFolder
+cd unassFolder
+
+# #merge unassembled unpaired files
+cat ../../pup_42.1.failUnPair.fastq ../../pup_42.2.failUnPair.fastq > pup_42_bowtieFailUnpairMerged.fastq
+
+#assemble at multiple k
+mkdir k41
+cd k41
+abyss-pe j=10 k=41 name=Unass_k41 lib='pe1' pe1='../../../pup_42.1.failPair.fastq ../../../pup_42.2.failPair.fastq' se=../pup_42_bowtieFailUnpairMerged.fastq
+cd ../
+
+mkdir k51
+cd k51
+abyss-pe j=10 k=51 name=Unass_k51 lib='pe1' pe1='../../../pup_42.1.failPair.fastq ../../../pup_42.2.failPair.fastq' se=../pup_42_bowtieFailUnpairMerged.fastq
+cd ../
+
+mkdir k61
+cd k61
+abyss-pe j=10 k=61 name=Unass_k61 lib='pe1' pe1='../../../pup_42.1.failPair.fastq ../../../pup_42.2.failPair.fastq' se=../pup_42_bowtieFailUnpairMerged.fastq
+cd ../
+
+mkdir k71
+cd k71
+abyss-pe j=10 k=71 name=Unass_k71 lib='pe1' pe1='../../../pup_42.1.failPair.fastq ../../../pup_42.2.failPair.fastq' se=../pup_42_bowtieFailUnpairMerged.fastq
+cd ../
+
+mkdir k81
+cd k81
+abyss-pe j=10 k=81 name=Unass_k81 lib='pe1' pe1='../../../pup_42.1.failPair.fastq ../../../pup_42.2.failPair.fastq' se=../pup_42_bowtieFailUnpairMerged.fastq
+cd ../
+

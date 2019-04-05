@@ -1,0 +1,84 @@
+#!/bin/sh -l
+
+#PBS -N ab0
+#PBS -q fnrgenetics
+#PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/
+
+###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
+mkdir abyssResults
+mkdir abyssResults/contigs
+mkdir abyssResults/scaffolds
+mkdir abyssResults/temp
+
+cd abyssResults
+
+#divide into groups
+split -n l/10 ../superblocks.txt
+
+#set easier names
+mv xaa superblocks1.txt
+mv xab superblocks2.txt
+mv xac superblocks3.txt
+mv xad superblocks4.txt
+mv xae superblocks5.txt
+mv xaf superblocks6.txt
+mv xag superblocks7.txt
+mv xah superblocks8.txt
+mv xai superblocks9.txt
+mv xaj superblocks10.txt
+
+offsetcount=9999
+for ind in 1 2 3 4 5 6 7 8 9 10
+do
+	printf "#!/bin/bash\n" > abyss1.${ind}.job
+	printf "#PBS -N ab1.${ind}\n" >> abyss1.${ind}.job
+	printf "#PBS -q beagle\n" >> abyss1.${ind}.job
+	printf "#PBS -l nodes=1:ppn=1,naccesspolicy=singleuser\n" >> abyss1.${ind}.job
+	printf "#PBS -l walltime=336:00:00\n" >> abyss1.${ind}.job
+	printf "#PBS -m abe\n" >> abyss1.${ind}.job
+	printf "#PBS -M jwillou@purdue.edu\n" >> abyss1.${ind}.job
+	printf "cd /scratch/snyder/j/jwillou/pupfish/assembly/\n" >> abyss1.${ind}.job
+	printf "module use /apps/group/bioinfo/modules\n" >> abyss1.${ind}.job
+	printf "module load samtools/1.3\n" >> abyss1.${ind}.job
+	printf "module load bamtools/2.3.0\n" >> abyss1.${ind}.job
+	printf "module load BEDTools/2.20.1\n" >> abyss1.${ind}.job
+
+	###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####\n" >> abyss1.${ind}.job
+	#deNovo assembly within superblocks 
+	printf "count=${offsetcount}\n" >> abyss1.${ind}.job
+	
+	#get files ready for abyss
+	printf "cat abyssResults/superblocks${ind}.txt | while IFS= read -r LINE\n" >> abyss1.${ind}.job
+		printf "do\n" >> abyss1.${ind}.job
+		printf "cd /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/\n" >> abyss1.${ind}.job
+	
+		#set up directory for collecting output
+		printf "count=$((count+1))\n" >> abyss1.${ind}.job
+		printf "mkdir ${count}_temp\n" >> abyss1.${ind}.job
+		printf "cd ${count}_temp \n" >> abyss1.${ind}.job
+	
+		#extract sequence names within specified region
+		printf "samtools view -b ../../pup_42_sorted.bam ${LINE} | samtools sort - -T pup_42 -no sequences_pup_42.bam\n" >> abyss1.${ind}.job
+    	printf "bedtools bamtofastq -i sequences_pup_42.bam -fq subseq_pup_42_R1.fastq -fq2 subseq_pup_42_R2.fastq\n" >> abyss1.${ind}.job
+    	printf "echo $PWD >> /scratch/snyder/j/jwillou/pupfish/assembly/dirlist${ind}.txt\n" >> abyss1.${ind}.job
+	printf "done\n" >> abyss1.${ind}.job
+	offsetcount=$((offsetcount+10000)) 
+done
+
+#launch jobs! 
+cd ../
+qsub abyss1.1.job
+qsub abyss1.2.job
+qsub abyss1.3.job
+qsub abyss1.4.job
+qsub abyss1.5.job
+qsub abyss1.6.job
+qsub abyss1.7.job
+qsub abyss1.8.job
+qsub abyss1.9.job
+qsub abyss1.10.job

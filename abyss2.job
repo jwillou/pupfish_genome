@@ -1,0 +1,75 @@
+#!/bin/sh -l
+
+#PBS -N ab2
+#PBS -q fnrgenetics
+#PBS -l nodes=1:ppn=1,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/
+
+module purge
+module use /apps/group/bioinfo/modules
+#module load abyss
+
+###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
+
+#set up job list for abyss - 10 different files will be created and submitted
+offsetcount=9999
+count=0
+for ind in 1 2 3 4 5 6 7 8 9 10
+do
+	printf "#!/bin/sh -l\n" > abyss2.${ind}.job
+	printf "#PBS -N ab2.${ind}\n" >> abyss2.${ind}.job
+	printf "#PBS -q fnrgenetics\n" >> abyss2.${ind}.job
+	printf "#PBS -l nodes=1:ppn=2,naccesspolicy=singleuser\n" >> abyss2.${ind}.job
+	printf "#PBS -l walltime=336:00:00\n" >> abyss2.${ind}.job
+	printf "#PBS -m abe\n" >> abyss2.${ind}.job
+	printf "#PBS -M jwillou@purdue.edu\n" >> abyss2.${ind}.job
+	printf "cd /scratch/snyder/j/jwillou/pupfish/assembly/\n" >> abyss2.${ind}.job
+	printf "module purge\n" >> abyss2.${ind}.job
+	printf "module use /apps/group/bioinfo/modules\n" >> abyss2.${ind}.job
+	printf "module load abyss\n" >> abyss2.${ind}.job
+
+	count=${offsetcount}
+	cat dirlist${ind}.txt | while IFS= read -r LINE
+	do
+		count=$((count+1))
+	
+		printf "cd $LINE\n" >> abyss2.${ind}.job
+    	#deNovo assembly (k41,k51,k61,k71,k81)
+		printf "abyss-pe k=41 name=X_41 --directory=$LINE lib='pe1' pe1='$LINE/subseq_pup_42_R1.fastq $LINE/subseq_pup_42_R2.fastq'\n" >> abyss2.${ind}.job
+		printf "abyss-pe k=51 name=X_51 --directory=$LINE lib='pe1' pe1='$LINE/subseq_pup_42_R1.fastq $LINE/subseq_pup_42_R2.fastq'\n" >> abyss2.${ind}.job
+		printf "abyss-pe k=61 name=X_61 --directory=$LINE lib='pe1' pe1='$LINE/subseq_pup_42_R1.fastq $LINE/subseq_pup_42_R2.fastq'\n" >> abyss2.${ind}.job
+		printf "abyss-pe k=71 name=X_71 --directory=$LINE lib='pe1' pe1='$LINE/subseq_pup_42_R1.fastq $LINE/subseq_pup_42_R2.fastq'\n" >> abyss2.${ind}.job
+		printf "abyss-pe k=81 name=X_81 --directory=$LINE lib='pe1' pe1='$LINE/subseq_pup_42_R1.fastq $LINE/subseq_pup_42_R2.fastq'\n" >> abyss2.${ind}.job
+ 	
+     	#copy files to output directory
+    	printf "cp $LINE/X_41-contigs.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/contigs/${count}_41-contigs.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_41-scaffolds.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/scaffolds/${count}_41-scaffolds.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_51-contigs.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/contigs/${count}_51-contigs.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_51-scaffolds.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/scaffolds/${count}_51-scaffolds.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_61-contigs.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/contigs/${count}_61-contigs.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_61-scaffolds.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/scaffolds/${count}_61-scaffolds.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_71-contigs.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/contigs/${count}_71-contigs.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_71-scaffolds.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/scaffolds/${count}_71-scaffolds.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_81-contigs.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/contigs/${count}_81-contigs.fa\n" >> abyss2.${ind}.job
+    	printf "cp $LINE/X_81-scaffolds.fa /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/scaffolds/${count}_81-scaffolds.fa\n" >> abyss2.${ind}.job
+    	
+    	printf "/bin/rm -r $LINE\n" >> abyss2.${ind}.job
+     	printf "echo ${count} >> log${ind}.txt\n" >> abyss2.${ind}.job
+	done
+	offsetcount=$((offsetcount+10000))
+done
+
+qsub abyss2.1.job
+qsub abyss2.2.job
+qsub abyss2.3.job
+qsub abyss2.4.job
+qsub abyss2.5.job
+qsub abyss2.6.job
+qsub abyss2.7.job
+qsub abyss2.8.job
+qsub abyss2.9.job
+qsub abyss2.10.job
