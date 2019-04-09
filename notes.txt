@@ -1,0 +1,11 @@
+Run order:
+1. trimmomatic.job
+2. fastqc.job
+3. bowtie2.job
+4. abyss0.job
+5. abyss2.job
+6. abyss3.job
+7. amoscmp.job
+8. bowtie2_s5.job
+9. abyss_s5
+10. 

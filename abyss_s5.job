@@ -1,0 +1,53 @@
+#!/bin/sh -l
+#PBS -N ab
+#PBS -q fnrdewoody
+#PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+module purge
+module use /apps/group/bioinfo/modules
+module load abyss
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/
+
+###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
+mkdir supercontUnassFolder
+cd supercontUnassFolder
+
+#ABySS deNovo assembly of reads that did not map to supercontigs (k41,k51,k61,k71,k81)
+mkdir k41
+cd k41
+abyss-pe k=41 name=X_41 --directory=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k41/ lib='pe1' pe1='/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.1.fastq /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.2.fastq' se=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failUnp.fastq
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/RemoveShortSeq.jar -i X_41-contigs.fa -o Unass-contigs_41_200.fa -length 100 >> $log
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/FastaStats.jar -i Unass-contigs_41_200.fa -min 200 >> /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k41/fastastats.txt
+cd ../
+
+mkdir k51
+cd k51
+abyss-pe k=51 name=X_51 --directory=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k51/ lib='pe1' pe1='/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.1.fastq /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.2.fastq' se=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failUnp.fastq
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/RemoveShortSeq.jar -i X_51-contigs.fa -o Unass-contigs_51_200.fa -length 100 >> $log
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/FastaStats.jar -i Unass-contigs_51_200.fa -min 200 >> /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k51/fastastats.txt
+cd ../
+
+mkdir k61
+cd k61
+abyss-pe k=61 name=X_61 --directory=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k61/ lib='pe1' pe1='/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.1.fastq /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.2.fastq' se=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failUnp.fastq
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/RemoveShortSeq.jar -i X_61-contigs.fa -o Unass-contigs_61_200.fa -length 100 >> $log
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/FastaStats.jar -i Unass-contigs_61_200.fa -min 200 >> /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k61/fastastats.txt
+cd ../
+
+mkdir k71
+cd k71
+abyss-pe k=71 name=X_71 --directory=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k71/ lib='pe1' pe1='/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.1.fastq /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.2.fastq' se=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failUnp.fastq
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/RemoveShortSeq.jar -i X_71-contigs.fa -o Unass-contigs_71_200.fa -length 100 >> $log
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/FastaStats.jar -i Unass-contigs_71_200.fa -min 200 >> /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k71/fastastats.txt
+cd ../
+
+mkdir k81
+cd k81
+abyss-pe k=81 name=X_81 --directory=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k81/ lib='pe1' pe1='/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.1.fastq /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failPair.2.fastq' se=/scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/pup_42_failUnp.fastq
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/RemoveShortSeq.jar -i X_81-contigs.fa -o Unass-contigs_81_200.fa -length 100 >> $log
+java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/FastaStats.jar -i Unass-contigs_81_200.fa -min 200 >> /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k81/fastastats.txt
+cd ../

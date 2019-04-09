@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#PBS -N bow2
+#PBS -q fnrdewoody
+#PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/
+
+module load bioinfo
+module load java
+module load samtools/1.3
+module load bowtie2/2.2.1
+module load bamtools/2.3.0
+
+###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
+# 5. Step: map reads on supercontigs
+
+cat 040524_WP4-UM_S173_R1_filteredT.fastq 040525_WP2-LM_S174_R1_filteredT.fastq > R1.fastq
+cat 040524_WP4-UM_S173_R2_filteredT.fastq 040525_WP2-LM_S174_R2_filteredT.fastq > R2.fastq
+
+#make seqnames unique
+java -jar ./refguided/RemoveShortSeq.jar -i AMOScmp/Amos_supercontigs.fasta -o AMOScmp/Amos_supercontigs_unique.fasta -length 1 -u
+   
+#get statistics
+java -jar ./refguided/progFastaStats.jar -i AMOScmp/Amos_supercontigs_unique.fasta -min 200 >> AMOScmp/fastastats.txt
+  
+#prepare reference
+bowtie2-build AMOScmp/Amos_supercontigs_unique.fasta AMOScmp/Amos_supercontigs_unique.fa
+
+#map reads to supercontigs  
+bowtie2 --sensitive -p 1 -q --phred33 -I 200 -X 500 -x AMOScmp/Amos_supercontigs_unique.fa -1 R1.fastq -2 R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -o AMOScmp/pup_42_all.sorted.bam
+samtools index AMOScmp/pup_42_all.sorted.bam
+    
+#get unmapped reads
+samtools view -b -f 4 AMOScmp/pup_42_all.sorted.bam > AMOScmp/pup_42_unmapped.sorted.bam
+samtools view -b -f 9 AMOScmp/pup_42_unmapped.sorted.bam > AMOScmp/pup_42_unmapped_pair.sorted.bam
+java -jar $PICARD/SamToFastq.jar INPUT=AMOScmp/pup_42_unmapped_pair.sorted.bam FASTQ=AMOScmp/pup_42_failPair.1.fastq SECOND_END_FASTQ=AMOScmp/pup_42_failPair.2.fastq
+rm AMOScmp/pup_42_unmapped_pair.sorted.bam
+samtools view -b -F 8 AMOScmp/pup_42_unmapped.sorted.bam | bamtools convert -format fastq -out AMOScmp/pup_42_failUnp.fastq
+
+bamtools stats -in AMOScmp/pup_42_all.sorted.bam >> bamtools_stats.txt
+echo "--> AMOScmp/pup_42_all.sorted.bam" >> bamtools_stats.txt
+     
+#filter for mapping quality >=10    
+samtools view -b -F 4 -q 10 AMOScmp/pup_42_all.sorted.bam > AMOScmp/pup_42.filtered.sorted.bam
+bamtools stats -in AMOScmp/pup_42.filtered.sorted.bam >> bamtools_stats.txt
+echo "--> AMOScmp/pup_42.filtered.sorted.bam" >> bamtools_stats.txt
