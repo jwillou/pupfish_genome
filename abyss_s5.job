@@ -51,3 +51,25 @@ abyss-pe k=81 name=X_81 --directory=/scratch/snyder/j/jwillou/pupfish/assembly/A
 java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/RemoveShortSeq.jar -i X_81-contigs.fa -o Unass-contigs_81_200.fa -length 100 >> $log
 java -jar /scratch/snyder/j/jwillou/pupfish/assembly/refguided/FastaStats.jar -i Unass-contigs_81_200.fa -min 200 >> /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/k81/fastastats.txt
 cd ../
+
+#remove contigs shorter than 200 bp
+cd /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/supercontUnassFolder/
+java -jar ../../refguided/RemoveShortSeq.jar -i k41/X_41-contigs.fa -o Unass-contigs_k41_200.fa -length 100 >> log.txt
+java -jar ../../refguided/FastaStats.jar -i Unass-contigs_k41_200.fa -min 200 >> log.txt
+  
+java -jar ../../refguided/RemoveShortSeq.jar -i k51/X_51-contigs.fa -o Unass-contigs_k51_200.fa -length 100 >> log.txt
+java -jar ../../refguided/FastaStats.jar -i Unass-contigs_k51_200.fa -min 200 >> log.txt
+ 
+java -jar ../../refguided/RemoveShortSeq.jar -i k61/X_61-contigs.fa -o Unass-contigs_k61_200.fa -length 100 >> log.txt
+java -jar ../../refguided/FastaStats.jar -i Unass-contigs_k61_200.fa -min 200 >> log.txt
+  
+java -jar ../../refguided/RemoveShortSeq.jar -i k71/X_71-contigs.fa -o Unass-contigs_k71_200.fa -length 100 >> log.txt
+java -jar ../../refguided/FastaStats.jar -i Unass-contigs_k71_200.fa -min 200 >> log.txt
+ 
+java -jar ../../refguided/RemoveShortSeq.jar -i k81/X_81-contigs.fa -o Unass-contigs_k81_200.fa -length 100 >> log.txt
+java -jar ../../refguided/FastaStats.jar -i Unass-contigs_k81_200.fa -min 200 >> log.txt
+
+  
+  
+  
+  

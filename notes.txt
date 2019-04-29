@@ -8,4 +8,5 @@ Run order:
 7. amoscmp.job
 8. bowtie2_s5.job
 9. abyss_s5
-10. 
+10. bowtie_s6.job
+11. soap_s7.job
