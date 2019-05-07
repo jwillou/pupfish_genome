@@ -60,13 +60,13 @@ cd merged_corr
 #samtools mpileup -uf pup_42_supercontSeq_Unass.fa pup_42_filtered_RG.sorted_realigned.bam | bcftools call -c - | /group/bioinfo/apps/apps/bcftools-1.3/bin/vcfutils.pl vcf2fq -d 1 > merged_corr.fq    
   
 #remove start and end N
-#java -jar ../refguided/RemoveShortSeq.jar -i merged_corr.fq -o merged_corrWN.fa  -length 100 -n -fq >> log.txt
+#java -jar ../refguided/RemoveShortSeq.jar -i merged_corr.fq -o merged_corrWN.fa -length 100 -n -fq >> log.txt
   
 #get statistics
 #java -jar ../refguided/FastaStats.jar -i merged_corrWN.fa -min 200 >> log.txt
 
 # split sequences at places with no coverage ----------
-#bowtie2-build merged_corrWN merged_corrWN.fa
+#bowtie2-build merged_corrWN.fa merged_corrWN
 bowtie2 --sensitive -p 1 -q --phred33 -I 200 -X 500 -x merged_corrWN -1 ../R1.fastq -2 ../R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -o pup_42_corrWN_all.sorted.bam
 samtools index pup_42_corrWN_all.sorted.bam
 bamtools stats -in pup_42_corrWN_all.sorted.bam >> log.txt
