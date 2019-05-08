@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#PBS -N bow2
+#PBS -N sop
 #PBS -q fnrdewoody
 #PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
 #PBS -l walltime=336:00:00
@@ -21,17 +21,17 @@ module load bamtools/2.3.0
 
 mkdir scaffold_gapClosed
 cd scaffold_gapClosed
-
+ 
 #write config file
-mkdir soap.config  #/scratch/snyder/j/jwillou/pupfish/assembly/scaffold_gapClosed/
-java -jar ../../refguided/WriteSoapConfig.jar -insLength 300 -r1 ../../R1.fastq -r2 ../../R1.fastq -max 151 -ru 2 -rank -o soap.config/soapConf
+#mkdir soap.config  #/scratch/snyder/j/jwillou/pupfish/assembly/scaffold_gapClosed/
+#java -jar ../refguided/WriteSoapConfig.jar -insLength 300 -r1 ../../R1.fastq -r2 ../../R1.fastq -max 151 -ru 2 -rank -o soap.config/soapConf
 
 #need to download and install SOAP because Snyder version does not have fusion
 #https://github.com/aquaskyline/SOAPdenovo2/archive/master.zip <- I downloaded this to my laptop and unzipped
 #because I wanted to see what was in the folder, but I guess you could go right to Snyder with wget and tar?
 #use 'make' to install (https://github.com/aquaskyline/SOAPdenovo2)
-../SOAPdenovo2-master/SOAPdenovo-fusion -D -c merged_corrWN_splitFiltered.fa -K 63 -g pup_42_k63 -p 20
-../SOAPdenovo2-master/SOAPdenovo-127mer map -s soapConf -g pup_42_k63 -p 20
+../SOAPdenovo2-master/SOAPdenovo-fusion -D -c ../merged_corr/merged_corrWN_splitFiltered.fa -K 63 -g pup_42_k63 -p 20
+../SOAPdenovo2-master/SOAPdenovo-127mer map -s soap.config/soapConf -g pup_42_k63 -p 20
 ../SOAPdenovo2-master/SOAPdenovo-127mer scaff -g pup_42_k63 -p 20 -F
    
 #remove scaffolds < 200 bp ----------

@@ -6,7 +6,7 @@
 #PBS -l walltime=336:00:00
 #PBS -m abe
 #PBS -M jwillou@purdue.edu
-
+ 
 cd /scratch/snyder/j/jwillou/pupfish/assembly/
 
 module load bioinfo
@@ -67,18 +67,18 @@ cd merged_corr
 
 # split sequences at places with no coverage ----------
 #bowtie2-build merged_corrWN.fa merged_corrWN
-bowtie2 --sensitive -p 1 -q --phred33 -I 200 -X 500 -x merged_corrWN -1 ../R1.fastq -2 ../R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -o pup_42_corrWN_all.sorted.bam
-samtools index pup_42_corrWN_all.sorted.bam
-bamtools stats -in pup_42_corrWN_all.sorted.bam >> log.txt
+#bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x merged_corrWN -1 ../R1.fastq -2 ../R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -o pup_42_corrWN_all.sorted.bam
+#samtools index pup_42_corrWN_all.sorted.bam
+#bamtools stats -in pup_42_corrWN_all.sorted.bam >> log.txt
 
 #filter for mapping quality >=10
-samtools view -b -F 4 -q 10 pup_42_corrWN_all.sorted.bam > pup_42_corrWN.filtered.sorted.bam
-bamtools stats -in pup_42_corrWN.filtered.sorted.bam >> log.txt
+#samtools view -b -F 4 -q 10 pup_42_corrWN_all.sorted.bam > pup_42_corrWN.filtered.sorted.bam
+#bamtools stats -in pup_42_corrWN.filtered.sorted.bam >> log.txt
 ##samtools merge pup_42_corrWN.filtered.sorted.bam pup_42_corrWN.filtered.sorted.bam
-bedtools genomecov -ibam pup_42_corrWN.filtered.sorted.bam -bga > merged_corrWN_filteredCov.txt
+#bedtools genomecov -ibam pup_42_corrWN.filtered.sorted.bam -bga > merged_corrWN_filteredCov.txt
   
 #only proparly paired reads
-samtools faidx merged_corrWN.fa
-samtools view -bf 0x2 pup_42_corrWN.filtered.sorted.bam | samtools sort - -n | bedtools bamtobed -i - -bedpe | awk '$1 == $4' | cut -f 1,2,6 | sort -k 1,1 | bedtools genomecov -i - -bga -g merged_corrWN.fai  > merged_corrWN_filteredPairedCov.txt
+#samtools faidx merged_corrWN.fa
+samtools view -bf 0x2 pup_42_corrWN.filtered.sorted.bam | samtools sort - -n | bedtools bamtobed -i - -bedpe | awk '$1 == $4' | cut -f 1,2,6 | sort -k 1,1 | bedtools genomecov -i - -bga -g merged_corrWN.fa.fai  > merged_corrWN_filteredPairedCov.txt
 java -jar ../refguided/SplitSeqLowCov.jar -i merged_corrWN_filteredCov.txt -paired merged_corrWN_filteredPairedCov.txt -o merged_corrWN_filteredNotCov.txt -mCov 1 -fasta merged_corrWN.fa -fastaOut merged_corrWN_splitFiltered.fa >> log.txt
 java -jar ../refguided/FastaStats.jar -i merged_corrWN_splitFiltered.fa -min 200 >> log.txt
