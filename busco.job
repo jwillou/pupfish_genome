@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#PBS -N bus
+#PBS -q standby
+#PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
+#PBS -l walltime=4:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+module load biopython/2.7.12
+module load AUGUSTUS/3.2.1
+module load blast
+module load HMMER/3.1b2
+
+#set up steps:
+#1. change config.ini in BUSCO config directory
+#2. make sure agustus can actually run
+#mkdir /scratch/snyder/j/jwillou/pupfish/assembly/rf_output/augustus
+#cp -rp $AUGUSTUS_CONFIG_PATH /scratch/snyder/j/jwillou/pupfish/assembly/rf_output/augustus
+
+
+#actually run it?
+export AUGUSTUS_CONFIG_PATH=/scratch/snyder/j/jwillou/pupfish/assembly/rf_output/augustus/config
+cd /scratch/snyder/j/jwillou/pupfish/assembly/rf_output
+python ./busco-master/scripts/run_BUSCO.py -i pup_42_k63_scafSeq.fa -o busco_out -c 20 -l ./busco-master/actinopterygii_odb9 -m geno
