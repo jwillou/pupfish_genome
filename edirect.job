@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#PBS -N edir
+#PBS -q fnrfish
+#PBS -l nodes=1:ppn=8,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/rf_output/
+
+#module load edirect/9.40
+module load sra-toolkit/2.9.2
+
+#proteins
+# esearch -db protein -query "("Cyprinodon"[Organism]) AND refseq[filter]" | efetch -format fasta > cyprinodon_prot.fa
+ 
+#est
+# mkdir sra_ncbi
+export VDB_CONFIG=/scratch/snyder/j/jwillou/pupfish/assembly/rf_output/custom.kfg
+
+# cat SraAccList.txt | while IFS=$'\t' read -r SRA #note: exported list of SRAs from NCBI website
+# 	do
+# 	prefetch ${SRA}
+# 	fastq-dump /scratch/snyder/j/jwillou/pupfish/assembly/rf_output/ncbi/public/sra/${SRA}.sra  
+# 	mv SRR* sra_ncbi/ 
+# done
+# cd sra_ncbi/ 
+# cat SRR* > ../cyprinodon_est.fa
+

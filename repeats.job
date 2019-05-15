@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#PBS -N repeats
+#PBS -q fnrfish
+#PBS -l nodes=1:ppn=5,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+module load bioinfo
+module load perl 
+module load RepeatMasker/4.0.7 #/group/bioinfo/apps/apps/RepeatMasker-4.0.7
+module load RECON/1.08 #/group/bioinfo/apps/apps/RECON-1.08/bin
+module load RepeatScout/1.0.5 #/group/bioinfo/apps/apps/RepeatScout-1.0.5
+module load nseg/1995-09-28 #/group/bioinfo/apps/apps/nseg-1995-09-28
+module load trf/4.04 #/group/bioinfo/apps/apps/trf-4.04
+module load rmblast/2.2.28 #/group/bioinfo/apps/apps/blast-2.6.0+/bin
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/rf_output/repeatmodeler
+
+#./RepeatModeler-open-1.0.11/BuildDatabase -name pupfish -engine ncbi ../pup_42_k63_scafSeq.fa
+#./RepeatModeler-open-1.0.11/RepeatModeler -pa 20 -engine ncbi -database pupfish
+
+#RepeatMasker -pa 20 -e ncbi -lib RM_10887.TueMay141024422019/consensi.fa.classified ../pup_42_k63_scafSeq.fa -dir ../pup_42_k63_scafSeq_masked_lib.fa
+#RepeatMasker -pa 20 -e ncbi -speices danio ../pup_42_k63_scafSeq_masked_lib.fa -dir ../pup_42_k63_scafSeq_masked_all.fa
+
+#create GFF3
+#rmOutToGFF3.pl Full_mask/Boa_constrictor_SGA_7C.scaffolds.full_mask.out > Full_mask/Boa_constrictor_SGA_7C.scaffolds.full_mask.out.gff3
+
+# isolate complex repeats
+#grep -v -e "Satellite" -e ")n" -e "-rich" Boa_constrictor_SGA_7C_scaffolds.full_mask.gff3 \
+#  > Boa_constrictor_SGA_7C_scaffolds.full_mask.complex.gff3
+
+# reformat to work with MAKER
+#cat Boa_constrictor_SGA_7C_scaffolds.full_mask.complex.gff3 | \
+#  perl -ane '$id; if(!/^\#/){@F = split(/\t/, $_); chomp $F[-1];$id++; $F[-1] .= "\;ID=$id"; $_ = join("\t", @F)."\n"} print $_' \
+#  > Boa_constrictor_SGA_7C_scaffolds.full_mask.complex.reformat.gff3
+
+
+
+
+
+
