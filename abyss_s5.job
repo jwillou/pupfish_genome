@@ -10,6 +10,7 @@ module purge
 module use /apps/group/bioinfo/modules
 module load abyss
 
+
 cd /scratch/snyder/j/jwillou/pupfish/assembly/AMOScmp/
 
 ###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
