@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#PBS -N id
-#PBS -q beagle
+#PBS -N trimm
+#PBS -q fnrfish
 #PBS -l nodes=1:ppn=10,naccesspolicy=singleuser
 #PBS -l walltime=336:00:00
 #PBS -m abe
@@ -32,10 +32,3 @@ trimmomatic PE -phred33 \
 040525_WP2-LM_S174_R2_filteredT.fastq \
 040525_WP2-LM_S174_R2_filteredTup.fastq \
 LEADING:21 TRAILING:20 MINLEN:30 ILLUMINACLIP:trimmomatic_illumina.fa:2:40:10
-
-
-###abandoned idba
-# fq2fa --merge 040524_WP4-UM_S173_R1_filteredT.fastq 040524_WP4-UM_S173_R2_filteredT.fastq WP4UM.fas
-# fq2fa --merge 040525_WP2-LM_S174_R1_filteredT.fastq 040525_WP2-LM_S174_R2_filteredT.fastq WP2LM.fas
-# cat WP4UM.fas WP2LM.fas > WP.fas
-#./idba-master/bin/idba_hybrid --out /scratch/snyder/j/jwillou/pupfish/assembly/ -r WP.fas --reference ../c_variegatus/GCF_000732505.1_C_variegatus-1.0_genomic.fna --num_threads 20

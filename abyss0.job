@@ -1,7 +1,7 @@
 #!/bin/sh -l
 
 #PBS -N ab0
-#PBS -q fnrgenetics
+#PBS -q fnrfish
 #PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
 #PBS -l walltime=336:00:00
 #PBS -m abe
@@ -18,7 +18,7 @@ mkdir abyssResults/temp
 cd abyssResults
 
 #divide into groups
-split -n l/10 ../superblocks.txt
+split -n l/20 ../superblocks.txt
 
 #set easier names
 mv xaa superblocks1.txt
@@ -31,13 +31,23 @@ mv xag superblocks7.txt
 mv xah superblocks8.txt
 mv xai superblocks9.txt
 mv xaj superblocks10.txt
+mv xak superblocks11.txt
+mv xal superblocks12.txt
+mv xam superblocks13.txt
+mv xan superblocks14.txt
+mv xao superblocks15.txt
+mv xap superblocks16.txt
+mv xaq superblocks17.txt
+mv xar superblocks18.txt
+mv xas superblocks19.txt
+mv xat superblocks20.txt
 
-offsetcount=9999
-for ind in 1 2 3 4 5 6 7 8 9 10
+count=9999
+for ind in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
 do
 	printf "#!/bin/bash\n" > abyss1.${ind}.job
 	printf "#PBS -N ab1.${ind}\n" >> abyss1.${ind}.job
-	printf "#PBS -q beagle\n" >> abyss1.${ind}.job
+	printf "#PBS -q fnrfish\n" >> abyss1.${ind}.job
 	printf "#PBS -l nodes=1:ppn=1,naccesspolicy=singleuser\n" >> abyss1.${ind}.job
 	printf "#PBS -l walltime=336:00:00\n" >> abyss1.${ind}.job
 	printf "#PBS -m abe\n" >> abyss1.${ind}.job
@@ -54,19 +64,27 @@ do
 	
 	#get files ready for abyss
 	printf "cat abyssResults/superblocks${ind}.txt | while IFS= read -r LINE\n" >> abyss1.${ind}.job
-		printf "do\n" >> abyss1.${ind}.job
-		printf "cd /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/\n" >> abyss1.${ind}.job
+	printf "do\n" >> abyss1.${ind}.job
+	printf "cd /scratch/snyder/j/jwillou/pupfish/assembly/abyssResults/\n" >> abyss1.${ind}.job
 	
-		#set up directory for collecting output
-		printf "count=$((count+1))\n" >> abyss1.${ind}.job
-		printf "mkdir ${count}_temp\n" >> abyss1.${ind}.job
-		printf "cd ${count}_temp \n" >> abyss1.${ind}.job
+	#set up directory for collecting output
+	printf "count=" >> abyss1.${ind}.job
+	printf '$((count+1))' >> abyss1.${ind}.job
+	printf "\n" >> abyss1.${ind}.job
+	printf "mkdir " >> abyss1.${ind}.job
+	printf '${count}' >> abyss1.${ind}.job
+	printf "_temp\n" >> abyss1.${ind}.job
+	printf "cd " >> abyss1.${ind}.job
+	printf '${count}' >> abyss1.${ind}.job
+	printf "_temp \n" >> abyss1.${ind}.job
 	
-		#extract sequence names within specified region
-		printf "samtools view -b ../../pup_42_sorted.bam ${LINE} | samtools sort - -T pup_42 -no sequences_pup_42.bam\n" >> abyss1.${ind}.job
-    	printf "bedtools bamtofastq -i sequences_pup_42.bam -fq subseq_pup_42_R1.fastq -fq2 subseq_pup_42_R2.fastq\n" >> abyss1.${ind}.job
-    	printf "echo $PWD >> /scratch/snyder/j/jwillou/pupfish/assembly/dirlist${ind}.txt\n" >> abyss1.${ind}.job
+	#extract sequence names within specified region
+	printf "samtools view -b ../../pup_42_sorted.bam | samtools sort - -T pup_42 -no sequences_pup_42.bam\n" >> abyss1.${ind}.job
+   	printf "bedtools bamtofastq -i sequences_pup_42.bam -fq subseq_pup_42_R1.fastq -fq2 subseq_pup_42_R2.fastq\n" >> abyss1.${ind}.job
+    printf "pwd >> /scratch/snyder/j/jwillou/pupfish/assembly/dirlist${ind}.txt\n" >> abyss1.${ind}.job
 	printf "done\n" >> abyss1.${ind}.job
+	
+	#incre
 	offsetcount=$((offsetcount+10000)) 
 done
 
@@ -82,3 +100,13 @@ qsub abyss1.7.job
 qsub abyss1.8.job
 qsub abyss1.9.job
 qsub abyss1.10.job
+qsub abyss1.11.job
+qsub abyss1.12.job
+qsub abyss1.13.job
+qsub abyss1.14.job
+qsub abyss1.15.job
+qsub abyss1.16.job
+qsub abyss1.17.job
+qsub abyss1.18.job
+qsub abyss1.19.job
+qsub abyss1.20.job
