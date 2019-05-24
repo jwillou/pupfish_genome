@@ -10,37 +10,37 @@
 cd /scratch/snyder/j/jwillou/pupfish/assembly/
 
 ###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
-mkdir abyssResults
-mkdir abyssResults/contigs
-mkdir abyssResults/scaffolds
-mkdir abyssResults/temp
+# mkdir abyssResults
+# mkdir abyssResults/contigs
+# mkdir abyssResults/scaffolds
+# mkdir abyssResults/temp
 
 cd abyssResults
 
 #divide into groups
-split -n l/20 ../superblocks.txt
-
-#set easier names
-mv xaa superblocks1.txt
-mv xab superblocks2.txt
-mv xac superblocks3.txt
-mv xad superblocks4.txt
-mv xae superblocks5.txt
-mv xaf superblocks6.txt
-mv xag superblocks7.txt
-mv xah superblocks8.txt
-mv xai superblocks9.txt
-mv xaj superblocks10.txt
-mv xak superblocks11.txt
-mv xal superblocks12.txt
-mv xam superblocks13.txt
-mv xan superblocks14.txt
-mv xao superblocks15.txt
-mv xap superblocks16.txt
-mv xaq superblocks17.txt
-mv xar superblocks18.txt
-mv xas superblocks19.txt
-mv xat superblocks20.txt
+# split -n l/20 ../superblocks.txt
+# 
+# #set easier names
+# mv xaa superblocks1.txt
+# mv xab superblocks2.txt
+# mv xac superblocks3.txt
+# mv xad superblocks4.txt
+# mv xae superblocks5.txt
+# mv xaf superblocks6.txt
+# mv xag superblocks7.txt
+# mv xah superblocks8.txt
+# mv xai superblocks9.txt
+# mv xaj superblocks10.txt
+# mv xak superblocks11.txt
+# mv xal superblocks12.txt
+# mv xam superblocks13.txt
+# mv xan superblocks14.txt
+# mv xao superblocks15.txt
+# mv xap superblocks16.txt
+# mv xaq superblocks17.txt
+# mv xar superblocks18.txt
+# mv xas superblocks19.txt
+# mv xat superblocks20.txt
 
 count=9999
 for ind in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
@@ -79,7 +79,9 @@ do
 	printf "_temp \n" >> abyss1.${ind}.job
 	
 	#extract sequence names within specified region
-	printf "samtools view -b ../../pup_42_sorted.bam | samtools sort - -T pup_42 -no sequences_pup_42.bam\n" >> abyss1.${ind}.job
+	printf "samtools view -b ../../pup_42_sorted.bam "  >> abyss1.${ind}.job
+	printf '$LINE' >> abyss1.${ind}.job
+	printf "| samtools sort - -T pup_42 -no sequences_pup_42.bam\n" >> abyss1.${ind}.job
    	printf "bedtools bamtofastq -i sequences_pup_42.bam -fq subseq_pup_42_R1.fastq -fq2 subseq_pup_42_R2.fastq\n" >> abyss1.${ind}.job
     printf "pwd >> /scratch/snyder/j/jwillou/pupfish/assembly/dirlist${ind}.txt\n" >> abyss1.${ind}.job
 	printf "done\n" >> abyss1.${ind}.job
@@ -89,7 +91,7 @@ do
 done
 
 #launch jobs! 
-cd ../
+#cd ../
 qsub abyss1.1.job
 qsub abyss1.2.job
 qsub abyss1.3.job
