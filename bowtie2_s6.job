@@ -30,34 +30,34 @@ cd merged_corr
 
 #bowtie2-build pup_42_supercontSeq_Unass.fa pup_42_supercontSeq_Unass
   
-bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x pup_42_supercontSeq_Unass -1 ../R1.fastq -2 ../R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -@ 20 -o pup_42_all.sorted.bam
-samtools index -@ 20 pup_42_all.sorted.bam
-bamtools stats -in pup_42_all.sorted.bam >> log.txt
-
-#filter for mapping quality >=10
-samtools view -b -F 4 -q 10 pup_42_all.sorted.bam > pup_42_filtered.sorted.bam
-bamtools stats -in pup_42_filtered.sorted.bam >> log.txt
-
-# error correction ----------  
-echo -e "@RG\tID:pup_42_filtered.sorted\tPL:illumina\tPU:R1.fq\tLB:R2.fq\tSM:pup_42" >> rg
-samtools view -H pup_42_filtered.sorted.bam | cat - rg > header
-      
+# bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x pup_42_supercontSeq_Unass -1 ../R1.fastq -2 ../R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -@ 20 -o pup_42_all.sorted.bam
+# samtools index -@ 20 pup_42_all.sorted.bam
+# bamtools stats -in pup_42_all.sorted.bam >> log.txt
+# 
+# #filter for mapping quality >=10
+# samtools view -b -F 4 -q 10 pup_42_all.sorted.bam > pup_42_filtered.sorted.bam
+# bamtools stats -in pup_42_filtered.sorted.bam >> log.txt
+# 
+# # error correction ----------  
+# echo -e "@RG\tID:pup_42_filtered.sorted\tPL:illumina\tPU:R1.fq\tLB:R2.fq\tSM:pup_42" >> rg
+# samtools view -H pup_42_filtered.sorted.bam | cat - rg > header
+#       
 #realign reads
-samtools merge -r -@ 20 -h header pup_42_filtered_RG.sorted.bam pup_42_filtered.sorted.bam
-rm rg header
+# samtools merge -r -@ 20 -h header pup_42_filtered_RG.sorted.bam pup_42_filtered.sorted.bam
+# rm rg header
  
-samtools index pup_42_filtered_RG.sorted.bam
-samtools faidx pup_42_supercontSeq_Unass.fa
-java -jar $PICARD/CreateSequenceDictionary.jar R=pup_42_supercontSeq_Unass.fa O=pup_42_supercontSeq_Unass.dict
+# samtools index pup_42_filtered_RG.sorted.bam
+# samtools faidx pup_42_supercontSeq_Unass.fa
+# java -jar $PICARD/CreateSequenceDictionary.jar R=pup_42_supercontSeq_Unass.fa O=pup_42_supercontSeq_Unass.dict
 
 ####NOTE: THIS WON'T FREAKING RUN AND IS NOT SUPPORTED IN NEW GATK, SKIPPING FOR NOW
 #GenomeAnalysisTK -T RealignerTargetCreator -nt 20 -R pup_42_supercontSeq_Unass.fa -I pup_42_filtered_RG.sorted.bam -o target_intervals.list &> GATK.log
 #GenomeAnalysisTK -T IndelRealigner -nt 20 -R pup_42_supercontSeq_Unass.fa -I pup_42_filtered_RG.sorted.bam -targetIntervals target_intervals.list -o pup_42_filtered_RG.sorted_realigned.bam &> GATK.log
 
-cp pup_42_filtered_RG.sorted.bam pup_42_filtered_RG.sorted_realigned.bam
+#cp pup_42_filtered_RG.sorted.bam pup_42_filtered_RG.sorted_realigned.bam
 
 #get alternative seq
-samtools mpileup -@ 20 -uf pup_42_supercontSeq_Unass.fa pup_42_filtered_RG.sorted_realigned.bam | bcftools call -c - | /group/bioinfo/apps/apps/bcftools-1.3/bin/vcfutils.pl vcf2fq -d 1 > merged_corr.fq    
+samtools mpileup -uf pup_42_supercontSeq_Unass.fa pup_42_filtered_RG.sorted_realigned.bam | bcftools call -c - | /group/bioinfo/apps/apps/bcftools-1.3/bin/vcfutils.pl vcf2fq -d 1 > merged_corr.fq    
   
 #remove start and end N
 java -jar ../refguided/RemoveShortSeq.jar -i merged_corr.fq -o merged_corrWN.fa -length 100 -n -fq >> log.txt
