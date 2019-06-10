@@ -18,42 +18,42 @@ module load MUMmer/4
 cd /scratch/snyder/j/jwillou/pupfish/assembly/
 
 #merge deNovo assembled superblocks into one FASTA file
-# for (( j=41; j<=81; j+=10 ))
-# do
-# 	cat  abyssResults/contigs/*_${j}-contigs.fa > abyssResults/${j}_abyssContigs.fa
-# done   
-# cat abyssResults/*_abyssContigs.fa > abyssResults/abyssContigs.fa
-#    
-# #merge Unassembled files
-# cat  abyssResults/unassFolder/k*/*-contigs.fa >  abyssResults/unassFolder/Unassembled_Abyss.fa
-#  
-# #remove short seq (<500)
-# java -jar ./refguided/RemoveShortSeq.jar -i  abyssResults/unassFolder/Unassembled_Abyss.fa -o  abyssResults/Unassembled_Abyss_500.fa -length 500
-# 
-# #merge all files
-# cat abyssResults/abyssContigs.fa abyssResults/Unassembled_Abyss_500.fa > abyssResults/deNovo_Superblocks.fa
-#      
-# #remove short seq (<200)
-# java -jar ./refguided/RemoveShortSeq.jar -i abyssResults/deNovo_Superblocks.fa -o abyssResults/deNovo_Superblocks_200.fa -length 200 -u
-#  
+for (( j=41; j<=81; j+=10 ))
+do
+	cat  abyssResults/contigs/*_${j}-contigs.fa > abyssResults/${j}_abyssContigs.fa
+done   
+cat abyssResults/*_abyssContigs.fa > abyssResults/abyssContigs.fa
+   
+#merge Unassembled files
+cat  abyssResults/unassFolder/k*/*-contigs.fa >  abyssResults/unassFolder/Unassembled_Abyss.fa
+ 
+#remove short seq (<500)
+java -jar ./refguided/RemoveShortSeq.jar -i  abyssResults/unassFolder/Unassembled_Abyss.fa -o  abyssResults/Unassembled_Abyss_500.fa -length 500
+
+#merge all files
+cat abyssResults/abyssContigs.fa abyssResults/Unassembled_Abyss_500.fa > abyssResults/deNovo_Superblocks.fa
+     
+#remove short seq (<200)
+java -jar ./refguided/RemoveShortSeq.jar -i abyssResults/deNovo_Superblocks.fa -o abyssResults/deNovo_Superblocks_200.fa -length 200 -u
+ 
 #remove redundency with AMOScmp
-# mkdir AMOScmp  
+mkdir AMOScmp  
 cd AMOScmp
    
 #assemble all assembled superblocks with AMOScmp to supercontigs (with the help of reference)
-# java -jar ../refguided/FastaToAmos.jar -i ../abyssResults/deNovo_Superblocks_200.fa -o deNovo_Superblocks_200_Amos.afg
+java -jar ../refguided/FastaToAmos.jar -i ../abyssResults/deNovo_Superblocks_200.fa -o deNovo_Superblocks_200_Amos.afg
   
 #${progAmos}AMOScmp -D TGT=${superblockSeqAmos} -D REF=${refRed}.fa ${supercontigs}
-#run AMPScmp step by step and use multithread nucmer to speed it up
+run AMPScmp step by step and use multithread nucmer to speed it up
 
 #Building AMOS bank
-# /group/bioinfo/apps/apps/amos-3.1.0/bin/bank-transact -c -z -b Amos_supercontigs.bnk -m deNovo_Superblocks_200_Amos.afg
+/group/bioinfo/apps/apps/amos-3.1.0/bin/bank-transact -c -z -b Amos_supercontigs.bnk -m deNovo_Superblocks_200_Amos.afg
 
 #Collecting clear range sequences
-# /group/bioinfo/apps/apps/amos-3.1.0/bin/dumpreads Amos_supercontigs.bnk > Amos_supercontigs.seq
+/group/bioinfo/apps/apps/amos-3.1.0/bin/dumpreads Amos_supercontigs.bnk > Amos_supercontigs.seq
 
 #Running nucmer #####NOTE: seemed to hang at this step, so stopped here and then ran remaining steps!#####
-# nucmer --maxmatch --threads=20 --prefix=Amos_supercontigs /scratch/snyder/j/jwillou/pupfish/assembly/ref/Cvariegatus_cleaned.fa Amos_supercontigs.seq &>> lognucmer.txt
+nucmer --maxmatch --threads=20 --prefix=Amos_supercontigs /scratch/snyder/j/jwillou/pupfish/assembly/ref/Cvariegatus_cleaned.fa Amos_supercontigs.seq &>> lognucmer.txt
 
 #Running layout
 /group/bioinfo/apps/apps/amos-3.1.0/bin/casm-layout -t 1000 -U Amos_supercontigs.layout -C Amos_supercontigs.conflict -b Amos_supercontigs.bnk Amos_supercontigs.delta

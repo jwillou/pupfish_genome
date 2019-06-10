@@ -22,47 +22,47 @@ module load BEDTools/2.20.1
 ###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
 # 6. Step: map reads to all supercontigs and correct them 
 
-#mkdir merged_corr
+mkdir merged_corr
 cd merged_corr
   
-#cat ../AMOScmp/Amos_supercontigs_unique.fasta ../AMOScmp/supercontUnassFolder/Unass-contigs_* > pup_42_supercontSeq_Unass.fa
-#java -jar ../refguided/FastaStats.jar -i pup_42_supercontSeq_Unass.fa -min 200 >> log.txt
+cat ../AMOScmp/Amos_supercontigs_unique.fasta ../AMOScmp/supercontUnassFolder/Unass-contigs_* > pup_42_supercontSeq_Unass.fa
+java -jar ../refguided/FastaStats.jar -i pup_42_supercontSeq_Unass.fa -min 200 >> log.txt
 
-#bowtie2-build pup_42_supercontSeq_Unass.fa pup_42_supercontSeq_Unass
+bowtie2-build pup_42_supercontSeq_Unass.fa pup_42_supercontSeq_Unass
   
-# bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x pup_42_supercontSeq_Unass -1 ../R1.fastq -2 ../R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -@ 20 -o pup_42_all.sorted.bam
-# samtools index -@ 20 pup_42_all.sorted.bam
-# bamtools stats -in pup_42_all.sorted.bam >> log.txt
-# 
-# #filter for mapping quality >=10
-# samtools view -b -F 4 -q 10 pup_42_all.sorted.bam > pup_42_filtered.sorted.bam
-# bamtools stats -in pup_42_filtered.sorted.bam >> log.txt
-# 
-# # error correction ----------  
-# echo -e "@RG\tID:pup_42_filtered.sorted\tPL:illumina\tPU:R1.fq\tLB:R2.fq\tSM:pup_42" >> rg
-# samtools view -H pup_42_filtered.sorted.bam | cat - rg > header
-#       
-#realign reads
-# samtools merge -r -@ 20 -h header pup_42_filtered_RG.sorted.bam pup_42_filtered.sorted.bam
-# rm rg header
+bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x pup_42_supercontSeq_Unass -1 ../R1.fastq -2 ../R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -@ 20 -o pup_42_all.sorted.bam
+samtools index -@ 20 pup_42_all.sorted.bam
+bamtools stats -in pup_42_all.sorted.bam >> log.txt
+
+# filter for mapping quality >=10
+samtools view -b -F 4 -q 10 pup_42_all.sorted.bam > pup_42_filtered.sorted.bam
+bamtools stats -in pup_42_filtered.sorted.bam >> log.txt
+
+# error correction ----------  
+echo -e "@RG\tID:pup_42_filtered.sorted\tPL:illumina\tPU:R1.fq\tLB:R2.fq\tSM:pup_42" >> rg
+samtools view -H pup_42_filtered.sorted.bam | cat - rg > header
+      
+# realign reads
+samtools merge -r -@ 20 -h header pup_42_filtered_RG.sorted.bam pup_42_filtered.sorted.bam
+rm rg header
  
-# samtools index pup_42_filtered_RG.sorted.bam
-# samtools faidx pup_42_supercontSeq_Unass.fa
-# java -jar $PICARD/CreateSequenceDictionary.jar R=pup_42_supercontSeq_Unass.fa O=pup_42_supercontSeq_Unass.dict
+samtools index pup_42_filtered_RG.sorted.bam
+samtools faidx pup_42_supercontSeq_Unass.fa
+java -jar $PICARD/CreateSequenceDictionary.jar R=pup_42_supercontSeq_Unass.fa O=pup_42_supercontSeq_Unass.dict
 
 ####NOTE: THIS WON'T FREAKING RUN AND IS NOT SUPPORTED IN NEW GATK, SKIPPING FOR NOW
-#GenomeAnalysisTK -T RealignerTargetCreator -nt 20 -R pup_42_supercontSeq_Unass.fa -I pup_42_filtered_RG.sorted.bam -o target_intervals.list &> GATK.log
-#GenomeAnalysisTK -T IndelRealigner -nt 20 -R pup_42_supercontSeq_Unass.fa -I pup_42_filtered_RG.sorted.bam -targetIntervals target_intervals.list -o pup_42_filtered_RG.sorted_realigned.bam &> GATK.log
+####GenomeAnalysisTK -T RealignerTargetCreator -nt 20 -R pup_42_supercontSeq_Unass.fa -I pup_42_filtered_RG.sorted.bam -o target_intervals.list &> GATK.log
+####GenomeAnalysisTK -T IndelRealigner -nt 20 -R pup_42_supercontSeq_Unass.fa -I pup_42_filtered_RG.sorted.bam -targetIntervals target_intervals.list -o pup_42_filtered_RG.sorted_realigned.bam &> GATK.log
 
-#cp pup_42_filtered_RG.sorted.bam pup_42_filtered_RG.sorted_realigned.bam
+cp pup_42_filtered_RG.sorted.bam pup_42_filtered_RG.sorted_realigned.bam
 
-#get alternative seq
+# get alternative seq
 samtools mpileup -uf pup_42_supercontSeq_Unass.fa pup_42_filtered_RG.sorted_realigned.bam | bcftools call -c - | /group/bioinfo/apps/apps/bcftools-1.3/bin/vcfutils.pl vcf2fq -d 1 > merged_corr.fq    
   
-#remove start and end N
+# remove start and end N
 java -jar ../refguided/RemoveShortSeq.jar -i merged_corr.fq -o merged_corrWN.fa -length 100 -n -fq >> log.txt
   
-#get statistics
+# get statistics
 java -jar ../refguided/FastaStats.jar -i merged_corrWN.fa -min 200 >> log.txt
 
 # split sequences at places with no coverage ----------
@@ -71,13 +71,13 @@ bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x merged_corrWN -1 ../R1.f
 samtools index pup_42_corrWN_all.sorted.bam
 bamtools stats -in pup_42_corrWN_all.sorted.bam >> log.txt
 
-#filter for mapping quality >=10
+# filter for mapping quality >=10
 samtools view -b -F 4 -q 10 pup_42_corrWN_all.sorted.bam > pup_42_corrWN.filtered.sorted.bam
 bamtools stats -in pup_42_corrWN.filtered.sorted.bam >> log.txt
 samtools merge pup_42_corrWN.filtered.sorted.bam pup_42_corrWN.filtered.sorted.bam
 bedtools genomecov -ibam pup_42_corrWN.filtered.sorted.bam -bga > merged_corrWN_filteredCov.txt
   
-#only proparly paired reads
+# only proparly paired reads
 samtools faidx merged_corrWN.fa
 samtools view -bf 0x2 pup_42_corrWN.filtered.sorted.bam | samtools sort - -n | bedtools bamtobed -i - -bedpe | awk '$1 == $4' | cut -f 1,2,6 | sort -k 1,1 | bedtools genomecov -i - -bga -g merged_corrWN.fa.fai  > merged_corrWN_filteredPairedCov.txt
 java -jar ../refguided/SplitSeqLowCov.jar -i merged_corrWN_filteredCov.txt -paired merged_corrWN_filteredPairedCov.txt -o merged_corrWN_filteredNotCov.txt -mCov 1 -fasta merged_corrWN.fa -fastaOut merged_corrWN_splitFiltered.fa >> log.txt

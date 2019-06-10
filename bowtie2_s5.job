@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #PBS -N bow2
-#PBS -q fnrdewoody
+#PBS -q fnrquail
 #PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
 #PBS -l walltime=336:00:00
 #PBS -m abe
@@ -19,21 +19,21 @@ module load picard-tools/1.109
 ###following https://bitbucket.org/HeidiLischer/refguideddenovoassembly_pipelines####
 # 5. Step: map reads on supercontigs
 
-#cat 040524_WP4-UM_S173_R1_filteredT.fastq 040525_WP2-LM_S174_R1_filteredT.fastq > R1.fastq
-#cat 040524_WP4-UM_S173_R2_filteredT.fastq 040525_WP2-LM_S174_R2_filteredT.fastq > R2.fastq
+cat 040524_WP4-UM_S173_R1_filteredT.fastq 040525_WP2-LM_S174_R1_filteredT.fastq > R1.fastq
+cat 040524_WP4-UM_S173_R2_filteredT.fastq 040525_WP2-LM_S174_R2_filteredT.fastq > R2.fastq
 
 #make seqnames unique
-#java -jar ./refguided/RemoveShortSeq.jar -i AMOScmp/Amos_supercontigs.fasta -o AMOScmp/Amos_supercontigs_unique.fasta -length 1 -u
+java -jar ./refguided/RemoveShortSeq.jar -i AMOScmp/Amos_supercontigs.fasta -o AMOScmp/Amos_supercontigs_unique.fasta -length 1 -u
    
 #get statistics
-#java -jar ./refguided/FastaStats.jar -i AMOScmp/Amos_supercontigs_unique.fasta -min 200 >> AMOScmp/fastastats.txt
+java -jar ./refguided/FastaStats.jar -i AMOScmp/Amos_supercontigs_unique.fasta -min 200 >> AMOScmp/fastastats.txt
   
 #prepare reference
-#bowtie2-build AMOScmp/Amos_supercontigs_unique.fasta AMOScmp/Amos_supercontigs_unique.fa
+bowtie2-build AMOScmp/Amos_supercontigs_unique.fasta AMOScmp/Amos_supercontigs_unique.fa
 
 #map reads to supercontigs  
-#bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x AMOScmp/Amos_supercontigs_unique.fa -1 R1.fastq -2 R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -o AMOScmp/pup_42_all.sorted.bam
-#samtools index AMOScmp/pup_42_all.sorted.bam
+bowtie2 --sensitive -p 20 -q --phred33 -I 200 -X 500 -x AMOScmp/Amos_supercontigs_unique.fa -1 R1.fastq -2 R2.fastq | samtools view -bS - | samtools sort - -T pup_42 -o AMOScmp/pup_42_all.sorted.bam
+samtools index AMOScmp/pup_42_all.sorted.bam
     
 #get unmapped reads
 samtools view -b -f 4 AMOScmp/pup_42_all.sorted.bam > AMOScmp/pup_42_unmapped.sorted.bam

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 #PBS -N bus
-#PBS -q standby
-#PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
+#PBS -q fnrdewoody
+#PBS -l nodes=1:ppn=5,naccesspolicy=singleuser
 #PBS -l walltime=4:00:00
 #PBS -m abe
 #PBS -M jwillou@purdue.edu
@@ -22,4 +22,4 @@ module load HMMER/3.1b2
 #actually run it?
 export AUGUSTUS_CONFIG_PATH=/scratch/snyder/j/jwillou/pupfish/assembly/rf_output/augustus/config
 cd /scratch/snyder/j/jwillou/pupfish/assembly/rf_output
-python ./busco-master/scripts/run_BUSCO.py -i pup_42_k63_scafSeq.fa -o busco_out -c 20 -l ./busco-master/vertebrata_odb9 -m geno
+python ./busco-master/scripts/run_BUSCO.py -i pup_42_1000scafSeq.fa -o busco_out -c 20 -l ./busco-master/vertebrata_odb9 -m geno

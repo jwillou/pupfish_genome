@@ -1,6 +1,6 @@
 #!/bin/sh -l
 #PBS -N ab
-#PBS -q fnrdewoody
+#PBS -q fnrquail
 #PBS -l nodes=1:ppn=20,naccesspolicy=singleuser
 #PBS -l walltime=336:00:00
 #PBS -m abe
