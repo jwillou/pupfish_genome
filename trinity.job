@@ -1,7 +1,7 @@
 #!/bin/sh -l
 
-#PBS -q fnrfish
-#PBS -l nodes=1:ppn=10
+#PBS -q beagle
+#PBS -l nodes=1:ppn=20
 #PBS -l walltime=300:00:00
 #PBS -l naccesspolicy=singleuser
 #PBS -N trinity
@@ -17,9 +17,9 @@ module load sra-toolkit/2.9.2
 export VDB_CONFIG=/scratch/snyder/j/jwillou/pupfish/assembly/rf_output/custom.kfg
 
 #C. variegatus SRAs: SRR8288545 SRR8288546 SRR8288547
-fastq-dump --split-3 ncbi/public/sra/SRR8288545.sra
-fastq-dump --split-3 ncbi/public/sra/SRR8288546.sra
-fastq-dump --split-3 ncbi/public/sra/SRR8288547.sra
+#fastq-dump --defline-seq '@$sn[_$rn]/$ri' --split-files ncbi/public/sra/SRR8288545.sra
+#fastq-dump --defline-seq '@$sn[_$rn]/$ri' --split-files ncbi/public/sra/SRR8288546.sra
+#fastq-dump --defline-seq '@$sn[_$rn]/$ri' --split-files ncbi/public/sra/SRR8288547.sra
 
 #Illumina truseq achieves strand specificity; must be RF for SS_lib_type
 Trinity --seqType fq --max_memory 500G --left SRR8288545_1.fastq,SRR8288546_1.fastq,SRR8288547_1.fastq --right SRR8288545_2.fastq,SRR8288546_2.fastq,SRR8288547_2.fastq  --CPU 20 --SS_lib_type RF --output trinity-out

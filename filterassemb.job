@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#PBS -N filter
+#PBS -q standby
+#PBS -l nodes=1:ppn=1,naccesspolicy=singleuser
+#PBS -l walltime=336:00:00
+#PBS -m abe
+#PBS -M jwillou@purdue.edu
+
+cd /scratch/snyder/j/jwillou/pupfish/assembly/rf_output/
+
+java -jar ../refguided/FastaStats.jar -i pup_42_scafSeq.fa -min 1000 > fastastats1000.txt
+java -jar ../refguided/RemoveShortSeq.jar -i pup_42_scafSeq.fa -o pup_42_1000scafSeq.fa -length 1000 
+
+java -jar ../refguided/FastaStats.jar -i pup_42_scafSeq.fa -min 1000 > fastastats10000.txt
+java -jar ../refguided/RemoveShortSeq.jar -i pup_42_scafSeq.fa -o pup_42_10000scafSeq.fa -length 1000 
