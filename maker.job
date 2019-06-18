@@ -1,0 +1,126 @@
+#!/bin/bash
+
+#SBATCH --job-name="maker"
+#SBATCH --output="maker.sterrout"
+#SBATCH -A tow102
+#SBATCH --partition=compute
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=24
+#SBATCH --export=ALL
+#SBATCH -t 48:00:00
+
+#This job runs with 1 nodes, 24 cores per node for a total of 24 cores.
+#ibrun in verbose mode will give binding detail
+
+export MODULEPATH=/share/apps/compute/modulefiles/applications:$MODULEPATH
+module load maker
+module load snap/0.15.4
+module load augustus/2.5.5 #/share/apps/compute/modulefiles/applications
+module load biopython/1.68
+module load hmmer/3.1b2
+module load blast/2.3.0 #/opt/modulefiles/applications
+module load bedtools/2.25.0
+
+cd /oasis/scratch/comet/jdoyle/temp_project/pupfish_maker
+
+#### round 1 ####
+#mpirun -np 24 maker -g pup_42_1000scafSeq.fa -base pupfish -cpus 24 ./maker_round1/maker_opts.ctl ./maker_round1/maker_bopts.ctl ./maker_round1/maker_exe.ctl &> log_maker1.txt
+#cd pupfish.maker.output
+#gff3_merge -s -d pupfish_master_datastore_index.log > pupfish_rnd1.all.maker.gff
+#fasta_merge -d pupfish_master_datastore_index.log
+#gff3_merge -n -s -d pupfish_master_datastore_index.log > pupfish_rnd1.all.maker.noseq.gff #GFF w/o the sequences
+#cd ../
+
+#### snap training ####
+# mkdir snap
+# mkdir snap/round1
+#cd snap/round1
+
+# export gene models from MAKER
+#maker2zff -n -d ../../pupfish.maker.output/pupfish_master_datastore_index.log
+
+# gather some stats and validate
+#fathom genome.ann genome.dna -gene-stats > gene-stats.log 2>&1
+#fathom genome.ann genome.dna -validate   > validate.log 2>&1
+
+# collect training sequences and annotations (plus 1000bp surrounding)
+#fathom genome.ann genome.dna -categorize 1000 > categorize.log 2>&1
+#fathom uni.ann uni.dna -export 1000 -plus > uni-plus.log 2>&1
+
+# create training parameters
+#mkdir params
+#cd params
+#forge ../export.ann ../export.dna
+#cd ../
+
+# assemble-HMM
+#hmm-assembler.pl pupfish_rnd1 params > pupfish_rnd1.hmm
+
+#### agustus training  ####
+### set up
+###mkdir /oasis/scratch/comet/jdoyle/temp_project/pupfish_maker/augustus
+###cp -rp $AUGUSTUS_CONFIG_PATH /oasis/scratch/comet/jdoyle/temp_project/pupfish_maker/augustus
+
+# running
+export AUGUSTUS_CONFIG_PATH=/oasis/scratch/comet/jdoyle/temp_project/pupfish_maker/augustus/config
+cd /oasis/scratch/comet/jdoyle/temp_project/pupfish_maker/augustus
+
+#awk -v OFS="\t" '{ if ($3 == "mRNA") print $1, $4, $5 }' ../pupfish.maker.output/pupfish_rnd1.all.maker.gff | awk -v OFS="\t" '{ if ($2 < 1000) print $1, "0", $3+1000; else print $1, $2-1000, $3+1000 }' | bedtools getfasta -fi ../pup_42_1000scafSeq.fa -bed - -fo pupfish_rnd1.all.maker.transcripts1000.fasta
+python ../busco-master/scripts/run_BUSCO.py -i pupfish_rnd1.all.maker.transcripts1000.fasta -o pupfish_rnd1_maker -l ../busco-master/actinopterygii_odb9/ -m genome -c 8 --long -sp human -z --augustus_parameters='--progress=true'
+
+
+#####to run on snyder
+#makeblastdb -in uniprot_sprot.fasta \
+#-dbtype prot \
+#-out uniprot_database \
+#-max_file_sz '2GB' 
+
+#blastp -db uniprot_database \
+#-query SteppeEagle_k92_PE-abyss_noxeno_min3000.all.maker.proteins.fasta \
+#-out maker2prot.blastp -evalue .000001 -num_threads 20 -outfmt 6 -num_alignments 1 -seg yes \
+#-soft_masking true -lcase_masking -max_hsps 1
+
+#interproscan.sh -appl PfamA -iprlookup -goterms -f TSV -i SteppeEagle_k92_PE-abyss_noxeno_min3000.all.maker.proteins.fasta
+
+#perl iprscan_parser.pl all.maker.proteins.fasta.tsv > iprscan_summary.txt
+#perl iprscan_parser.pl -d all.maker.proteins.fasta.tsv > iprscan_top100domains.txt
+
+
+
+
+# MAKER version 2.31.10
+# Usage:
+#      maker [options] <maker_opts> <maker_bopts> <maker_exe>
+# 
+# Options:
+#      -genome|g <file>    Overrides the genome file path in the control files
+#      -RM_off|R           Turns all repeat masking options off.
+#      -datastore/         Forcably turn on/off MAKER's two deep directory
+#       nodatastore        structure for output.  Always on by default.
+#      -old_struct         Use the old directory styles (MAKER 2.26 and lower)
+#      -base    <string>   Set the base name MAKER uses to save output files.
+#                          MAKER uses the input genome file name by default.
+#      -tries|t <integer>  Run contigs up to the specified number of tries.
+#      -cpus|c  <integer>  Tells how many cpus to use for BLAST analysis.
+#                          Note: this is for BLAST and not for MPI!
+#      -force|f            Forces MAKER to delete old files before running again.
+# 			 This will require all blast analyses to be rerun.
+#      -again|a            recaculate all annotations and output files even if no
+# 			 settings have changed. Does not delete old analyses.
+#      -quiet|q            Regular quiet. Only a handlful of status messages.
+#      -qq                 Even more quiet. There are no status messages.
+#      -dsindex            Quickly generate datastore index file. Note that this
+#                          will not check if run settings have changed on contigs
+#      -nolock             Turn off file locks. May be usful on some file systems,
+#                          but can cause race conditions if running in parallel.
+#      -TMP                Specify temporary directory to use.
+#      -CTL                Generate empty control files in the current directory.
+#      -OPTS               Generates just the maker_opts.ctl file.
+#      -BOPTS              Generates just the maker_bopts.ctl file.
+#      -EXE                Generates just the maker_exe.ctl file.
+#      -MWAS    <option>   Easy way to control mwas_server for web-based GUI
+#                               options:  STOP
+#                                         START
+#                                         RESTART
+#      -version            Prints the MAKER version.
+#      -help|?             Prints this usage statement.
